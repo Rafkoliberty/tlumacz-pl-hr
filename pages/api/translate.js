@@ -1,13 +1,21 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { text, style } = req.body;
+  const { text, style, direction } = req.body;
   if (!text) return res.status(400).json({ error: "Brak tekstu" });
 
+  const isPlToHr = direction !== "hr-pl";
+
   const systemPrompts = {
-    formal: "You are a professional Polish to Croatian translator specializing in formal business correspondence. Translate the text from Polish to Croatian using formal, professional business language. Use formal forms of address. Return ONLY the Croatian translation — no explanations, no notes, no original text.",
-    casual: "You are a Polish to Croatian translator. Translate the text from Polish to Croatian using casual, relaxed, everyday language — as if texting a friend. Return ONLY the Croatian translation — no explanations, no notes, no original text.",
-    neutral: "You are a professional Polish to Croatian translator. Translate every message you receive from Polish to Croatian. Return ONLY the Croatian translation — no explanations, no notes, no original text. Preserve tone, style, and formatting."
+    formal: isPlToHr
+      ? "You are a professional Polish to Croatian translator specializing in formal business correspondence. Translate the text from Polish to Croatian using formal, professional business language. Use formal forms of address. Return ONLY the Croatian translation — no explanations, no notes, no original text."
+      : "You are a professional Croatian to Polish translator specializing in formal business correspondence. Translate the text from Croatian to Polish using formal, professional business language. Use formal forms of address. Return ONLY the Polish translation — no explanations, no notes, no original text.",
+    casual: isPlToHr
+      ? "You are a Polish to Croatian translator. Translate the text from Polish to Croatian using casual, relaxed, everyday language — as if texting a friend. Return ONLY the Croatian translation — no explanations, no notes, no original text."
+      : "You are a Croatian to Polish translator. Translate the text from Croatian to Polish using casual, relaxed, everyday language — as if texting a friend. Return ONLY the Polish translation — no explanations, no notes, no original text.",
+    neutral: isPlToHr
+      ? "You are a professional Polish to Croatian translator. Translate every message you receive from Polish to Croatian. Return ONLY the Croatian translation — no explanations, no notes, no original text. Preserve tone, style, and formatting."
+      : "You are a professional Croatian to Polish translator. Translate every message you receive from Croatian to Polish. Return ONLY the Polish translation — no explanations, no notes, no original text. Preserve tone, style, and formatting."
   };
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
